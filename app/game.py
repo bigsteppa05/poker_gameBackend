@@ -12,7 +12,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "game"))
 
 from deck import Deck
 from card import Card
-from evaluator import determine_winner
+from game import Game as PokerGame
+
+HAND_RANKING = [
+    "Royal Flush", "Straight Flush", "Four of a Kind", "Full House",
+    "Flush", "Straight", "Three of a Kind", "Two Pair", "One Pair", "High Card",
+]
 
 game_bp = Blueprint("game_bp", __name__)
 
@@ -105,12 +110,23 @@ def _advance_phase(g):
         result["new_community_cards"] = new_cards
 
     elif phase == "river":
-        # Showdown — reveal winner
         p_cards = _json_to_cards(g["player_cards"])
         c_cards = _json_to_cards(g["pc_cards"])
         comm    = [_str_to_card(x) for x in community]
 
-        winner, p_hand, c_hand = determine_winner(p_cards, c_cards, comm)
+        logic  = PokerGame()
+        p_hand = logic.get_best_hand(p_cards + comm)
+        c_hand = logic.get_best_hand(c_cards + comm)
+
+        p_rank = HAND_RANKING.index(p_hand)
+        c_rank = HAND_RANKING.index(c_hand)
+
+        if p_rank < c_rank:
+            winner = "player"
+        elif c_rank < p_rank:
+            winner = "pc"
+        else:
+            winner = "tie"
 
         g["phase"]  = "showdown"
         g["status"] = "finished"
@@ -120,7 +136,7 @@ def _advance_phase(g):
         result["winner"]      = winner
         result["player_hand"] = p_hand
         result["pc_hand"]     = c_hand
-        result["pc_cards"]    = json.loads(g["pc_cards"])  # reveal PC cards
+        result["pc_cards"]    = json.loads(g["pc_cards"])
 
     g["deck"]            = json.dumps(deck)
     g["community_cards"] = json.dumps(community)
