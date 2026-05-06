@@ -13,7 +13,7 @@ def generate_token(id):
     now=datetime.now(timezone.utc)
     payload={
         "id":id,
-        "exp":now+timedelta(seconds=30),
+        "exp":now+timedelta(hours=24),
         "iat":now
     }
 

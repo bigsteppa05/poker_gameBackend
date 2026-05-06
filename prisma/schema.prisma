@@ -58,6 +58,7 @@ model player {
   created_at      DateTime         @default(now()) @db.Timestamp(6)
   updated_at      DateTime         @default(now()) @db.Timestamp(6)
   player_password player_password?
+  games           game[]
 }
 
 model player_password {
@@ -66,4 +67,24 @@ model player_password {
   password   String
   updated_at DateTime @default(now()) @db.Timestamp(6)
   player     player   @relation(fields: [player_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model game {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  player_id       String   @db.Uuid
+  status          String   @default("active")
+  phase           String   @default("preflop")
+  player_cards    String
+  pc_cards        String
+  community_cards String   @default("[]")
+  deck            String
+  pot             Int      @default(0)
+  player_chips    Int      @default(2000)
+  pc_chips        Int      @default(2000)
+  player_bet      Int      @default(0)
+  pc_bet          Int      @default(0)
+  winner          String?
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @default(now()) @db.Timestamp(6)
+  player          player   @relation(fields: [player_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }

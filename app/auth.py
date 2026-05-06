@@ -21,10 +21,10 @@ async def login(prisma):
     password=data.get("password")
 
     if not email:
-        return jsonify({"custom":True,"_message":"Email required"})
-    
+        return jsonify({"custom":True,"_message":"Email required"}),400
+
     if not password:
-        return jsonify({"custom":True,"_message":"Password required"})
+        return jsonify({"custom":True,"_message":"Password required"}),400
     
     player=await prisma.player.find_unique(
         where={
@@ -86,15 +86,13 @@ async def sign_up(prisma):
         return jsonify({"custom":True,"_message":"Name required"}),400
     
     if not email:
-        return jsonify({"custom":True,"_message":"Email required"})
+        return jsonify({"custom":True,"_message":"Email required"}),400
 
     if not password:
        return jsonify({"custom":True,"_message":"Password required"}),400
-    
-    #strong  atlest 4 characters
-    # atlest a number
+
     if len(password)<3:
-        return jsonify({"custom":True,"_message":"Password must have atleast 4 charcters"})
+        return jsonify({"custom":True,"_message":"Password must have atleast 4 charcters"}),400
     
 
     hashed_passwod=bcrypt.generate_password_hash(password).decode("utf-8")
@@ -114,7 +112,7 @@ async def sign_up(prisma):
     )
 
     if player_exists:
-        return jsonify({"custom":True,"_message":"Email already in use." })
+        return jsonify({"custom":True,"_message":"Email already in use."}),409
     
 
    
